@@ -1,0 +1,3 @@
+// Local configuration and persistence. Values and storage key are unchanged.
+const cfg=Object.assign({name:'Diver',suit:0,skin:0,diff:1,bots:7,played:0,wins:0,best:0,coins:0,snd:true,sens:4.2,lh:false,inv:false,q:'auto',fpsShow:false},(()=>{try{return JSON.parse(localStorage.getItem('dd')||'{}')}catch(e){return{}}})());
+function save(){try{localStorage.setItem('dd',JSON.stringify(cfg))}catch(e){}}

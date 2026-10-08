@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#04182b">
+    <title>Deep Drop - Sea Battle Royale</title>
+    <link rel="stylesheet" href="./css/main.css">
+    <link rel="stylesheet" href="./css/menu.css">
+    <link rel="stylesheet" href="./css/mobile.css">
+</head>
+
+<body>
+    <canvas id="cv"></canvas>
+    <div id="hud">
+        <div class="bar" id="hp"><i></i><span>Health</span></div>
+        <div class="bar" id="ox"><i></i><span>Oxygen</span></div>
+        <div id="stats"></div>
+        <div id="cross"></div>
+        <div id="msg"></div>
+        <div id="wpn"></div>
+        <div id="mmFrame"><span id="mmTitle">TACTICAL MAP</span><canvas id="mm" width="150" height="150"></canvas></div>
+        <div id="navCompass" aria-label="Compass"><div id="compassTicks"><span data-dir="N">N</span><span data-dir="NE">NE</span><span data-dir="E">E</span><span data-dir="SE">SE</span><span data-dir="S">S</span><span data-dir="SW">SW</span><span data-dir="W">W</span><span data-dir="NW">NW</span></div><i></i></div>
+        <div id="safeNav" aria-live="polite"><span id="safeNavLabel">SAFE ZONE</span><b id="safeNavDir">&#8593;</b><strong id="safeNavDist">SAFE</strong></div>
+        <div id="navStatus"><span id="navState">SURFACE</span><b id="navDepth"></b></div>
+        <button id="swimBtn" class="swim-control" type="button" aria-pressed="false">SWIM <small>(X)</small></button>
+        <div id="zn"></div>
+        <div id="flash"></div>
+        <div id="zfx"></div>
+        <div id="dmg"></div>
+    </div>
+    <div id="tc">
+        <div id="tl"></div>
+        <div id="tr"></div>
+        <div id="joy"><i></i></div>
+        <button class="tb R" id="bFire">FIRE</button>
+        <button class="tb R" id="bAim">AIM</button>
+        <button class="tb R" id="bUp">&#9650;</button>
+        <button class="tb R" id="bDn">&#9660;</button>
+        <button class="tb R" id="bRel">&#8635;</button>
+        <button class="tb R" id="bSwim" type="button" aria-pressed="false">SWIM</button>
+        <button class="tb Lc" id="bFire2">FIRE</button>
+        <button class="tb" id="bPause">&#10074;&#10074;</button>
+        <div id="ctx"><button class="tb c" id="bDive">DIVE</button><button class="tb c" id="bBoat">BOAT</button><button
+                class="tb c" id="bKit">&#10010;</button><button class="tb c" id="bWall">&#9638;</button><button
+                class="tb c" id="bDome">&#9675;</button></div>
+    </div>
+    <div id="rot">
+        <p>Rotate your phone to landscape to play</p>
+    </div>
+    <div id="lobby">
+        <div class="menu-frame">
+            <div class="pnl menu-panel">
+                <header class="menu-header">
+                    <div class="brand-lockup" aria-label="Deep Drop - Sea Battle Royale">
+                        <h1 class="brand-title"><span>DEEP</span><span>DROP</span></h1>
+                        <p>SEA BATTLE ROYALE</p>
+                    </div>
+                    <button id="setBtn" class="ghost menu-settings" type="button"
+                        aria-label="Open settings">&#9881;<span>SETTINGS</span></button>
+                </header>
+                <p class="menu-kicker">Dive deeper. Survive longer.</p>
+                <button id="start" type="button"><span class="play-mark"
+                        aria-hidden="true">&#9654;</span><span>PLAY</span></button>
+                <details id="customize" class="customize-panel">
+                    <summary><span class="menu-symbol" aria-hidden="true">&#9673;</span><span>CUSTOMIZE</span><span
+                            class="summary-chevron" aria-hidden="true">&#8964;</span></summary>
+                    <div class="customize-body">
+                        <label for="nm">Diver name<input id="nm" maxlength="14" autocomplete="off"></label>
+                        <div class="row">Suit color</div>
+                        <div id="suits" class="swatch-row"></div>
+                        <div class="row">Skin tone</div>
+                        <div id="skins" class="swatch-row"></div>
+                    </div>
+                </details>
+                <div class="menu-section-title"><span>MATCH SETTINGS</span><i></i></div>
+                <div class="setting-grid">
+                    <section class="setting-card">
+                        <div class="setting-icon" aria-hidden="true">&#9632;&#9632;&#9632;</div>
+                        <div class="setting-label">DIFFICULTY</div>
+                        <div class="seg" id="dif"><button data-v="0">Easy</button><button
+                                data-v="1">Normal</button><button data-v="2">Hard</button></div>
+                    </section>
+                    <section class="setting-card">
+                        <div class="setting-icon" aria-hidden="true">&#9679;&#9679;&#9679;</div>
+                        <div class="setting-label">RIVALS</div>
+                        <div class="seg" id="cnt"><button data-v="3">3</button><button data-v="5">5</button><button
+                                data-v="7">7</button></div>
+                    </section>
+                </div>
+                <div class="menu-section-title stats-title"><span>YOUR RECORD</span><i></i></div>
+                <div id="stat"></div>
+                <div class="menu-secondary">
+                    <details class="menu-help">
+                        <summary><span class="menu-symbol" aria-hidden="true">&#9776;</span><span>HOW TO PLAY</span>
+                        </summary>
+                        <div class="guide-body">
+                            <dl id="lc"></dl>
+                            <dl id="lt" class="touchonly">
+                                <dt>Left thumb</dt>
+                                <dd>Move; push to the rim to sprint</dd>
+                                <dt>Right side</dt>
+                                <dd>Drag to look</dd>
+                                <dt>FIRE</dt>
+                                <dd>Hold to shoot, drag to aim</dd>
+                                <dt>AIM</dt>
+                                <dd>Toggle zoom</dd>
+                                <dt>&#9650; / &#9660;</dt>
+                                <dd>Rise or dive; jump and parachute in the air</dd>
+                                <dt>DIVE / SURFACE</dt>
+                                <dd>Tap to submerge or return to the surface</dd>
+                                <dt>&#8635;</dt>
+                                <dd>Reload</dd>
+                                <dt>Weapon slots</dt>
+                                <dd>Tap to swap</dd>
+                                <dt>BOAT &#10010; &#9638; &#9675;</dt>
+                                <dd>Appear when available</dd>
+                            </dl>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button id="snd" class="ghost">Sound: click to enable</button>
+    <div id="fps"></div>
+    <div id="set">
+        <div class="sbox">
+            <h2>Settings</h2>
+            <div id="sgfx"></div>
+            <p class="note">Auto picks a quality level for your device and lowers it if the game runs slowly. Changing
+                any option switches to a custom setup. Anti-aliasing applies after a restart.</p>
+            <div class="touchonly">
+                <div class="row touch-settings">Touch controls</div>
+                <div class="srow"><span>Look sensitivity</span><input id="sens" type="range" min="2" max="9" step=".5"
+                        aria-label="Look sensitivity"></div>
+                <div class="srow"><span>Layout and aiming</span>
+                    <div class="seg" id="tset"><button data-k="lh">Left-handed</button><button data-k="inv">Invert
+                            Y</button></div>
+                </div>
+            </div>
+            <button id="setDone">Done</button>
+        </div>
+    </div>
+    <div id="ov" data-mode="pause">
+        <div class="result-shell">
+            <div id="resultBanner" class="result-banner">LAST DIVER AFLOAT</div>
+            <h1 id="ovt">Deep Drop</h1>
+            <div id="resultPlace" class="result-place">1ST PLACE</div>
+            <p id="ovs">Last diver afloat wins. The best loot sits in the deep-sea zones, but your air runs out down
+                there.</p>
+            <div id="resultStats" class="result-stats" aria-label="Match results">
+                <div class="result-stat"><span>ELIMINATIONS</span><b id="resultKills">0</b></div>
+                <div class="result-stat"><span>FISH COINS</span><b id="resultCoins">+0</b></div>
+                <div class="result-stat"><span>SURVIVAL</span><b id="resultTime">00:00</b></div>
+                <div class="result-stat"><span>DIFFICULTY</span><b id="resultDifficulty">NORMAL</b></div>
+                <div class="result-stat"><span>RIVALS</span><b id="resultRivals">7</b></div>
+            </div>
+            <dl id="ctl">
+                <dt>W A S D</dt>
+                <dd>Swim / drive boat</dd>
+                <dt>Space / C</dt>
+                <dd>Rise / dive (or look down and swim)</dd>
+                <dt>Shift</dt>
+                <dd>Sprint</dd>
+                <dt>X / SWIM</dt>
+                <dd>Toggle continuous forward swimming</dd>
+                <dt>Click or F</dt>
+                <dd>Shoot (hold for auto guns)</dd>
+                <dt>R / Q / 1 2</dt>
+                <dd>Reload / swap gun / pick slot</dd>
+                <dt>Right-click</dt>
+                <dd>Aim down sights</dd>
+                <dt>E</dt>
+                <dd>Board or leave a boat</dd>
+                <dt>H</dt>
+                <dd>Use oxygen and health kit</dd>
+                <dt>G / B</dt>
+                <dd>Grow coral wall / air-pocket dome</dd>
+            </dl>
+            <div class="result-actions"><button id="go">PLAY AGAIN</button><button id="quit" class="ghost">BACK TO
+                    LOBBY</button><button id="setBtn2" class="ghost">Settings</button></div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="./js/core/config.js"></script>
+    <script src="./js/core/game.js"></script>
+    <script src="./js/world/ocean.js"></script>
+    <script src="./js/player/player-animation.js"></script>
+    <script src="./js/world/loot.js"></script>
+    <script src="./js/world/boats.js"></script>
+    <script src="./js/core/state.js"></script>
+    <script src="./js/player/player-combat.js"></script>
+    <script src="./js/input/keyboard.js"></script>
+    <script src="./js/input/mouse.js"></script>
+    <script src="./js/player/player-controller.js"></script>
+    <script src="./js/combat/bullets.js"></script>
+    <script src="./js/combat/damage.js"></script>
+    <script src="./js/combat/weapons.js"></script>
+    <script src="./js/core/loop.js"></script>
+    <script src="./js/ui/hud.js"></script>
+    <script src="./js/ui/results.js"></script>
+    <script src="./js/world/props.js"></script>
+    <script src="./js/world/surface-world.js"></script>
+    <script src="./js/systems/zone.js"></script>
+    <script src="./js/systems/progression.js"></script>
+    <script src="./js/world/zones.js"></script>
+    <script src="./js/audio/audio.js"></script>
+    <script src="./js/ui/lobby.js"></script>
+    <script src="./js/ui/settings.js"></script>
+    <script src="./js/input/touch.js"></script>
+    <script type="module" src="./js/main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,5 @@
+addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;keys[e.code]=true;if(e.code==='Space')e.preventDefault();if(e.code==='KeyM')auMute();if(!running)return;
+ if(e.code==='KeyX'&&!e.repeat){toggleSwim();return}if(e.code==='KeyE')toggleBoat();if(e.code==='KeyH')useKit();if(e.code==='KeyG')deployWall('wall');if(e.code==='Space'&&!e.repeat&&P.ph==='fall')P.cr=1;if(e.code==='KeyB')deployWall('dome');if(e.code==='KeyR')reload();if(e.code==='Digit1')sw(0);if(e.code==='Digit2')sw(1);if(e.code==='KeyQ')sw(1-P.cur)});
+addEventListener('keyup',e=>keys[e.code]=false);
+$('swimBtn').addEventListener('click',()=>{if(running&&!over)toggleSwim()});
+function showOv(t,s,b,ctl){if(t==='Paused'&&document.pointerLockElement===cv&&document.exitPointerLock)try{document.exitPointerLock()}catch(e){}$('ov').dataset.mode='pause';$('ovt').textContent=t;$('ovs').textContent=s;$('go').textContent=b;$('ctl').style.display=ctl?'grid':'none';$('quit').style.display=ctl?'inline-block':'none';$('setBtn2').style.display=ctl?'inline-block':'none';$('ov').style.display='flex'}
