@@ -70,4 +70,4 @@ if(running){T+=dt;zoneUpdate();
  tcUpdate();
  for(let i=rip.length-1;i>=0;i--){const r=rip[i];r.t+=dt;r.m.scale.setScalar(1+r.t*4);r.m.position.y=waveY(r.x,r.z,t)+.15;r.m.material.opacity=Math.max(0,.55-r.t*.5);if(r.t>1.1){scene.remove(r.m);r.m.geometry.dispose();r.m.material.dispose();rip.splice(i,1)}}
  for(let i=tr.length-1;i>=0;i--){tr[i].t-=dt;if(tr[i].t<0){scene.remove(tr[i].l);tr[i].l.geometry.dispose();tr.splice(i,1)}}
- if(started){updateCam();if((HF=(HF+1)%2)===0){hud();mini()}}else lobbyCam(t,dt);env(dt);waterUpdate(t);auUpdate(dt);renderer.render(scene,cam);if(typeof captureRenderStats==='function')captureRenderStats();perfTick(frameMs)}
+ if(started){updateCam();if((HF=(HF+1)%2)===0){hud();mini()}}else lobbyCam(t,dt);env(dt);waterUpdate(t);auUpdate(dt);renderer.render(scene,cam);if(typeof captureRenderStats==='function')captureRenderStats();perfTick(frameMs,started&&running&&!over)}

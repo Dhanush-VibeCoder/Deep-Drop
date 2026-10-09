@@ -32,7 +32,7 @@ let FPSM=16.7,pfT=0,pfN=0,pfCalls=0,pfTris=0,warm=0,lowT=0,hiT=0,slowT=0,upT=0,q
 function captureRenderStats(){const r=renderer.info&&renderer.info.render;if(r){RENDER_STATS.calls=r.calls||0;RENDER_STATS.triangles=r.triangles||0;RENDER_STATS.lines=r.lines||0;RENDER_STATS.points=r.points||0}if(renderer.info&&renderer.info.reset)renderer.info.reset()}
 function perfText(fps){let w=renderer.domElement.width,h=renderer.domElement.height;if(renderer.getDrawingBufferSize){renderer.getDrawingBufferSize(PERF_SIZE);w=PERF_SIZE.x;h=PERF_SIZE.y}return fps+' fps | '+FPSM.toFixed(1)+' ms | '+Math.round(Q.res*DYN)+'% | '+Math.round(pfCalls/Math.max(1,pfN))+' calls | '+Math.round(pfTris/Math.max(1,pfN))+' tris | DPR '+renderer.getPixelRatio().toFixed(2)+' | '+w+'x'+h}
 function changeAutoTier(next){if(!next||qCooldown>0)return false;cfg.autoT=next;save();qCooldown=9000;DYN=1;warm=0;applyQ();return true}
-function perfTick(ms){if(ms>250||ms<=0)return;qCooldown=Math.max(0,qCooldown-ms);FPSM=FPSM*.94+ms*.06;pfN++;pfT+=ms;pfCalls+=RENDER_STATS.calls;pfTris+=RENDER_STATS.triangles;warm++;
+function perfTick(ms,active){if(!active){warm=0;lowT=0;hiT=0;slowT=0;upT=0;return}if(ms>250||ms<=0)return;qCooldown=Math.max(0,qCooldown-ms);FPSM=FPSM*.94+ms*.06;pfN++;pfT+=ms;pfCalls+=RENDER_STATS.calls;pfTris+=RENDER_STATS.triangles;warm++;
  if(pfT>=500){if(cfg.fpsShow)$('fps').textContent=perfText(Math.round(pfN*1000/pfT));pfN=0;pfT=0;pfCalls=0;pfTris=0}
  if(warm<60)return;const target=1000/Q.fps,minD=Math.min(1,45/Q.res);
  if(Q.adapt){if(FPSM>target*1.18){lowT+=ms;hiT=0}else if(FPSM<target*1.08){hiT+=ms;lowT=0}else{lowT=0;hiT=0}
