@@ -1,7 +1,18 @@
 // ===== performance & settings (part B: apply quality, adaptive resolution, auto tier, settings panel) =====
-function recomputeQ(){const b=cfg.q==='auto'?PRE[cfg.autoT||(IS_TOUCH?'med':'high')]:cfg.q==='custom'?cfg:(PRE[cfg.q]||PRE.high);
+const tierKey=k=>k==='low'?'performance':k==='med'?'balanced':k==='performance'||k==='balanced'||k==='high'?k:null;
+function deviceTier(){
+ const touch=typeof IS_TOUCH!=='undefined'&&IS_TOUCH;if(!touch)return'high';
+ const cores=Math.max(1,Number(navigator.hardwareConcurrency)||4),mem=Number(navigator.deviceMemory)||4,dpr=Math.max(1,Number(devicePixelRatio)||1);
+ // Combine independent signals; unsupported memory data falls back to a balanced tier.
+ if((cores<=4&&mem<=3)||dpr>=3)return'performance';
+ if(cores>=8&&mem>=6&&dpr<=2)return'high';
+ return'balanced'
+}
+function autoTier(){return tierKey(cfg.autoT)||deviceTier()}
+function recomputeQ(){const b=cfg.q==='auto'?PRE[autoTier()]:cfg.q==='custom'?cfg:(PRE[tierKey(cfg.q)]||PRE.high);
  Q={res:b.res,adapt:b.adapt,fps:b.fps,water:b.water,clouds:b.clouds,caust:b.caust,lights:b.lights,grass:b.grass,fish:b.fish,fx:b.fx,dist:b.dist}}
-function applyRes(){renderer.setPixelRatio(clamp(Math.min(devicePixelRatio,IS_TOUCH?1.5:2)*(Q.res/100)*DYN,.35,2));resize()}
+function dprCap(){if(!IS_TOUCH)return 2;const cores=Number(navigator.hardwareConcurrency)||4,mem=Number(navigator.deviceMemory)||4,dpr=Number(devicePixelRatio)||1;return((cores<=4&&mem<=3)||dpr>=3)?1.25:1.5}
+function applyRes(){renderer.setPixelRatio(clamp(Math.min(devicePixelRatio,dprCap())*(Q.res/100)*DYN,.35,2));resize()}
 function applyQ(){recomputeQ();
  if(waterMat.defines.WQ!==Q.water){waterMat.defines.WQ=Q.water;waterMat.defines.FBM_O=Q.water>=2?4:2;waterMat.needsUpdate=true}
  if(WL!==Q.water){const R=[[48,32,40],[96,60,64],[160,100,96]][Q.water];waterA.geometry.dispose();waterB.geometry.dispose();
@@ -14,18 +25,23 @@ function applyQ(){recomputeQ();
  FQ=Q.fish/100;PMAX=Math.round(40+80*Q.fx/100);lamp.visible=Q.lights;XL.forEach(l=>{l.visible=Q.lights});
  FOGM=[.7,1,1.3][Q.dist];cam.far=Math.max(450,380*FOGM+120);sky.scale.setScalar((cam.far-30)/600);cam.updateProjectionMatrix();
  DYN=Math.min(1,Math.max(DYN,45/Q.res));applyRes();$('fps').style.display=cfg.fpsShow?'block':'none'}
-// frame-time monitor: shows FPS, scales render resolution to hold the target, and (in Auto) steps the quality tier down/up
-let FPSM=16.7,pfT=0,pfN=0,warm=0,lowT=0,hiT=0,slowT=0,upT=0;
-function perfTick(ms){if(ms>250||ms<=0)return;FPSM=FPSM*.94+ms*.06;pfN++;pfT+=ms;warm++;
- if(pfT>=500){if(cfg.fpsShow)$('fps').textContent=Math.round(pfN*1000/pfT)+' fps \u00B7 '+Math.round(Q.res*DYN)+'%';pfN=0;pfT=0}
+// Frame-time monitor: adapts only after sustained trends and exposes lightweight
+// renderer statistics through the existing optional FPS counter.
+const PERF_SIZE=new THREE.Vector2(),RENDER_STATS={calls:0,triangles:0,lines:0,points:0};
+let FPSM=16.7,pfT=0,pfN=0,pfCalls=0,pfTris=0,warm=0,lowT=0,hiT=0,slowT=0,upT=0,qCooldown=0;
+function captureRenderStats(){const r=renderer.info&&renderer.info.render;if(r){RENDER_STATS.calls=r.calls||0;RENDER_STATS.triangles=r.triangles||0;RENDER_STATS.lines=r.lines||0;RENDER_STATS.points=r.points||0}if(renderer.info&&renderer.info.reset)renderer.info.reset()}
+function perfText(fps){let w=renderer.domElement.width,h=renderer.domElement.height;if(renderer.getDrawingBufferSize){renderer.getDrawingBufferSize(PERF_SIZE);w=PERF_SIZE.x;h=PERF_SIZE.y}return fps+' fps | '+FPSM.toFixed(1)+' ms | '+Math.round(Q.res*DYN)+'% | '+Math.round(pfCalls/Math.max(1,pfN))+' calls | '+Math.round(pfTris/Math.max(1,pfN))+' tris | DPR '+renderer.getPixelRatio().toFixed(2)+' | '+w+'x'+h}
+function changeAutoTier(next){if(!next||qCooldown>0)return false;cfg.autoT=next;save();qCooldown=9000;DYN=1;warm=0;applyQ();return true}
+function perfTick(ms){if(ms>250||ms<=0)return;qCooldown=Math.max(0,qCooldown-ms);FPSM=FPSM*.94+ms*.06;pfN++;pfT+=ms;pfCalls+=RENDER_STATS.calls;pfTris+=RENDER_STATS.triangles;warm++;
+ if(pfT>=500){if(cfg.fpsShow)$('fps').textContent=perfText(Math.round(pfN*1000/pfT));pfN=0;pfT=0;pfCalls=0;pfTris=0}
  if(warm<60)return;const target=1000/Q.fps,minD=Math.min(1,45/Q.res);
  if(Q.adapt){if(FPSM>target*1.18){lowT+=ms;hiT=0}else if(FPSM<target*1.08){hiT+=ms;lowT=0}else{lowT=0;hiT=0}
   if(lowT>1200&&DYN>minD){DYN=Math.max(minD,DYN*.9);lowT=0;applyRes()}else if(hiT>6000&&DYN<1){DYN=Math.min(1,DYN*1.05);hiT=0;applyRes()}}
- if(cfg.q==='auto'){const cur=cfg.autoT||(IS_TOUCH?'med':'high');
-  if(DYN<=minD+.01&&FPSM>target*1.3){slowT+=ms;if(slowT>4000&&cur!=='low'){cfg.autoT=cur==='high'?'med':'low';save();slowT=0;DYN=1;warm=0;applyQ()}}else slowT=0;
-  if(cur!=='high'&&DYN>=1&&FPSM<target*.7&&!IS_TOUCH){upT+=ms;if(upT>12000){cfg.autoT=cur==='low'?'med':'high';save();upT=0;warm=0;applyQ()}}else upT=0}}
+ if(cfg.q==='auto'){const cur=autoTier(),order=['performance','balanced','high'],i=order.indexOf(cur);
+  if(DYN<=minD+.01&&FPSM>target*1.3){slowT+=ms;if(slowT>4000&&i>0){changeAutoTier(order[i-1]);slowT=0}}else slowT=0;
+  if(cur!=='high'&&DYN>=1&&FPSM<target*.7){upT+=ms;if(upT>18000&&i>=0&&i<order.length-1){changeAutoTier(order[i+1]);upT=0}}else upT=0}}
 const SETS=[
- {k:'q',l:'Quality preset',t:'seg',o:[['auto','Auto'],['low','Low'],['med','Medium'],['high','High']]},
+ {k:'q',l:'Quality preset',t:'seg',o:[['auto','Auto'],['low','Performance'],['med','Balanced'],['high','High']]},
  {k:'res',l:'Render resolution',t:'range',min:50,max:100,step:5,f:v=>v+'%'},
  {k:'adapt',l:'Adaptive resolution',t:'tg'},
  {k:'fps',l:'Target FPS',t:'seg',o:[[30,'30'],[60,'60']]},

@@ -15,16 +15,15 @@ body.touch{--u:1vmin}#hud{z-index:3}#lobby{z-index:6}#ov{z-index:10}
 #bFire{--s:24;--x:7;--y:8;background:#ff5a4d59;border-color:#ff8a80b3}
 #bAim{--s:14;--x:34;--y:12}
 #bUp{--s:15;--x:9;--y:36}
-#bDn{--s:12;--x:28;--y:36}
 #bRel{--s:12;--x:44;--y:30}
-#bSwim{--s:15;--x:44;--y:48}
+#bSwim{--s:15;--x:22;--y:48}
 #bFire2{--s:15;--x:5;--y:48}
+#bDive{--s:16;--x:20;--y:36;background:#5cd6ff59;border-color:#9fe8ffb3}
 #bPause{--s:9}
 #bSwim.swim-on{background:var(--gold);color:#04182b;border-color:#fff}
 #bPause{top:calc(2*var(--u) + env(safe-area-inset-top,0px));right:calc(2*var(--u) + env(safe-area-inset-right,0px))}
 #ctx{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(15*var(--u) + env(safe-area-inset-bottom,0px));display:flex;gap:calc(2*var(--u))}
 .tb.c{position:static;display:none}
-#bDive{--s:16;background:#5cd6ff59;border-color:#9fe8ffb3}
 .touchonly{display:none}body.touch .touchonly{display:block}body.touch .kb{display:none}body.touch #ctl{display:none!important}
 #lt{display:grid;grid-template-columns:auto auto;gap:4px 14px;margin:8px 0 0;font-size:12px}#lt dt{color:var(--gold);font-weight:700}#lt dd{margin:0}
 body.touch #mm{left:calc(8px + env(safe-area-inset-left,0px));top:calc(8px + env(safe-area-inset-top,0px));bottom:auto;width:calc(var(--u)*30);height:calc(var(--u)*30)}

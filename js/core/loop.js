@@ -56,7 +56,7 @@ function hud(){$('hp').firstChild.style.width=clamp(P.hp,0,100)+'%';$('ox').firs
 function end(win){resetSwim();resetDiveAction();over=true;running=false;auEnd(win);drainOff();cfg.played++;if(win)cfg.wins++;cfg.best=Math.max(cfg.best,P.kills);cfg.coins+=P.coins;save();if(document.exitPointerLock)document.exitPointerLock();cinSlow=1.15;msg(win?'LAST DIVER AFLOAT':'DIVER DOWN');setTimeout(()=>{if(over)showResults(win)},700)}
 
 let last=performance.now();
-function loop(now){requestAnimationFrame(loop);perfTick(now-last);const dt0=Math.min(.05,(now-last)/1000);TS+=((cinSlow>0?.4:1)-TS)*Math.min(1,dt0*8);cinSlow-=dt0;const dt=dt0*TS;last=now;const t=now/1000;
+function loop(now){requestAnimationFrame(loop);const frameMs=now-last,dt0=Math.min(.05,frameMs/1000);TS+=((cinSlow>0?.4:1)-TS)*Math.min(1,dt0*8);cinSlow-=dt0;const dt=dt0*TS;last=now;const t=now/1000;
  
  for(const b of boats)if(!b.rider)boatPhys(b,dt,0,0);
  for(const l of loot)if(l.alive){l.m.rotation.y+=dt*2;l.m.position.set(l.pos.x,l.pos.y+Math.sin(t*2+l.ph)*.25,l.pos.z)}
@@ -70,4 +70,4 @@ if(running){T+=dt;zoneUpdate();
  tcUpdate();
  for(let i=rip.length-1;i>=0;i--){const r=rip[i];r.t+=dt;r.m.scale.setScalar(1+r.t*4);r.m.position.y=waveY(r.x,r.z,t)+.15;r.m.material.opacity=Math.max(0,.55-r.t*.5);if(r.t>1.1){scene.remove(r.m);r.m.geometry.dispose();r.m.material.dispose();rip.splice(i,1)}}
  for(let i=tr.length-1;i>=0;i--){tr[i].t-=dt;if(tr[i].t<0){scene.remove(tr[i].l);tr[i].l.geometry.dispose();tr.splice(i,1)}}
- if(started){updateCam();if((HF=(HF+1)%2)===0){hud();mini()}}else lobbyCam(t,dt);env(dt);waterUpdate(t);auUpdate(dt);renderer.render(scene,cam)}
+ if(started){updateCam();if((HF=(HF+1)%2)===0){hud();mini()}}else lobbyCam(t,dt);env(dt);waterUpdate(t);auUpdate(dt);renderer.render(scene,cam);if(typeof captureRenderStats==='function')captureRenderStats();perfTick(frameMs)}

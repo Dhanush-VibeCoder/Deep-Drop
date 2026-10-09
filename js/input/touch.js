@@ -26,7 +26,7 @@ function bindBtn(id,down,up,drag){const el=$(id);let pid=null,lx=0,ly=0;
  bindBtn('bFire',()=>{TFIRE++},()=>{TFIRE=Math.max(0,TFIRE-1)},true);bindBtn('bFire2',()=>{TFIRE++},()=>{TFIRE=Math.max(0,TFIRE-1)},true);
  bindBtn('bSwim',()=>toggleSwim());bindBtn('bDive',()=>contextualDive());
  $('bAim').addEventListener('pointerdown',e=>{ads=!ads;e.preventDefault()});
- bindBtn('bUp',()=>{TUP=true;if(P.ph==='fall')P.cr=1},()=>{TUP=false});bindBtn('bDn',()=>{TDN=true},()=>{TDN=false});
+ bindBtn('bUp',()=>{TUP=true;if(P.ph==='fall')P.cr=1},()=>{TUP=false});
  bindBtn('bRel',()=>reload());bindBtn('bBoat',()=>toggleBoat());bindBtn('bKit',()=>useKit());bindBtn('bWall',()=>deployWall('wall'));bindBtn('bDome',()=>deployWall('dome'));bindBtn('bPause',()=>pauseGame());
  $('wpn').addEventListener('pointerdown',e=>{const el=e.target.closest&&e.target.closest('.sl');if(!el||!IS_TOUCH)return;const i=[...$('wpn').querySelectorAll('.sl')].indexOf(el);if(i>=0)sw(i)});
  $('tc').addEventListener('contextmenu',e=>e.preventDefault());['gesturestart','gesturechange'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault()));document.addEventListener('dblclick',e=>e.preventDefault());
@@ -40,8 +40,8 @@ function sh(id,on){const e=$(id);if(e._o!==on){e._o=on;e.style.display=on?'flex'
 function tcUpdate(){const on=IS_TOUCH&&started&&running&&!over;if(on!==tcOn){tcOn=on;$('tc').style.display=on?'block':'none'}if(!on)return;
  const pl=P.ph==='play';if(!pl){TFIRE=0;ads=false}
  let near=false;if(pl){if(P.boat)near=true;else if(P.pos.y>-3)for(const b of boats)if(!b.rider&&b.pos.distanceTo(P.pos)<9){near=true;break}}
- sh('bFire',pl);sh('bFire2',pl);sh('bAim',pl);sh('bRel',pl);sh('bSwim',pl);sh('bDive',pl&&!P.boat);sh('bDn',pl||P.ph==='fall');sh('bBoat',near);sh('bKit',pl&&P.kits>0&&(P.hp<100||P.o2<100));sh('bWall',pl&&P.walls>0);sh('bDome',pl&&P.domes>0);
- const up=P.ph==='plane'?'JUMP':P.ph==='fall'?'CHUTE':P.ph==='chute'||P.ph==='dive'?'':'\u25B2';if($('bUp')._t!==up){$('bUp')._t=up;$('bUp').textContent=up}sh('bUp',up!=='');
+ sh('bFire',pl);sh('bFire2',pl);sh('bAim',pl);sh('bRel',pl);sh('bSwim',pl);sh('bDive',pl&&!P.boat);sh('bBoat',near);sh('bKit',pl&&P.kits>0&&(P.hp<100||P.o2<100));sh('bWall',pl&&P.walls>0);sh('bDome',pl&&P.domes>0);
+ const up=P.ph==='plane'?'JUMP':P.ph==='fall'?'CHUTE':'';if($('bUp')._t!==up){$('bUp')._t=up;$('bUp').textContent=up}sh('bUp',up!=='');
  const bt=P.boat?'LEAVE':'BOAT';if($('bBoat')._t!==bt){$('bBoat')._t=bt;$('bBoat').textContent=bt}
  const diveText=P.pos.y<-1.2?'SURFACE':'DIVE';if($('bDive')._t!==diveText){$('bDive')._t=diveText;$('bDive').textContent=diveText}$('bKit').textContent='\u271A'+P.kits;$('bWall').textContent='\u25A6'+P.walls;$('bDome').textContent='\u25EF'+P.domes;$('bAim').classList.toggle('on',ads);$('bSwim').classList.toggle('swim-on',swimActive);$('bSwim').setAttribute('aria-pressed',String(swimActive))}
 // gentle aim assist: pulls the view toward an enemy near the crosshair while aiming or firing on touch

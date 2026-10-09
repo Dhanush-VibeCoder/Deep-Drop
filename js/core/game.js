@@ -1,14 +1,17 @@
 const $=i=>document.getElementById(i),V=THREE.Vector3,clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),rnd=(a,b)=>a+Math.random()*(b-a);
 const cv=$('cv'),renderer=new THREE.WebGLRenderer({canvas:cv,powerPreference:'high-performance',antialias:(()=>{try{const x=JSON.parse(localStorage.getItem('dd')||'{}');if(x.aa!==undefined)return x.aa;return !/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent)}catch(e){return true}})()});
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+// The quality system owns the drawing-buffer scale. Keep renderer.info per-frame
+// until the lightweight metrics sampler captures and resets it.
+renderer.info.autoReset=false;
 const scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(70,1,.1,700);
 const SKYC=new THREE.Color(0x8fd3f4),C1=new THREE.Color(0x1d8bb5),C2=new THREE.Color(0x020b16),TMP=new THREE.Color();
 scene.background=SKYC.clone();scene.fog=new THREE.Fog(0x8fd3f4,80,380);
 scene.add(new THREE.HemisphereLight(0xffffff,0x2a6f8a,1));
 const sun=new THREE.DirectionalLight(0xfff2cc,.8);sun.position.set(50,100,30);scene.add(sun);
 const lamp=new THREE.PointLight(0xbfefff,0,50);scene.add(lamp);
-function resize(){renderer.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()}
-addEventListener('resize',resize);resize();
+function resize(){renderer.setSize(Math.max(1,innerWidth),Math.max(1,innerHeight));cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()}
+function refreshRenderSize(){if(typeof applyRes==='function'&&typeof Q!=='undefined')applyRes();else resize()}
+addEventListener('resize',refreshRenderSize);resize();
 
 const ZONES=[[-110,60],[90,-100],[120,110],[-60,-120],[230,-20],[-230,-20],[20,230],[-40,-240],[-190,-170]];
 const TINTS=[[.18,.08,.3],[.12,.16,.35],[.1,.09,.09],[.08,.25,.12],[.35,.38,.4],[.04,.08,.14],[.45,.25,.35],[.5,.4,.2],[.12,.2,.2]];
